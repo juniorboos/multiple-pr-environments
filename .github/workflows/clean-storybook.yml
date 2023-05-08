@@ -1,0 +1,29 @@
+name: Clean storybook
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: storybook-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  remove-folder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+      - name: Remove ${{ github.head_ref }} folder
+        run: rm -rf ${{ github.head_ref }}
+      - name: Commit changes
+        run: |
+          # Commit removed folder
+          git add .
+          git commit -m "Remove ${{ github.head_ref }}" --no-verify
+          git push origin gh-pages
